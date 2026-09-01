@@ -235,3 +235,32 @@ python main.py --chat --workdir .\demo_workspace --verbose --trace
 ## 11. 合规说明
 
 题目允许使用模型厂商 API 客户端、OpenAI 兼容网关和原生 tool calling；本项目进一步采用标准库直接发送 HTTP。Agent 主循环、工具定义与本地执行、上下文管理、模型输出解析、错误处理、记忆和终止条件均由本项目自行实现，不调用任何现成 Agent 产品、Agent 框架、Agent SDK、Code Interpreter 或 Files API。
+
+## 12. Web 可视化运行台（可选）
+
+除命令行外，项目提供一个**零第三方依赖**的本地 Web 展示台，用于在浏览器里实时观看一次运行：模型回复、工具调用与结果、工作记忆，以及**创新点实时联动高亮**（例如 `run_command` 出结果时点亮「执行反馈驱动的自我反省」，快照生成时点亮「快照与回滚」）。
+
+它只新增一个 `on_progress` 回调，把命令行事件流转发到浏览器，**不改动 Agent 核心与命令行**，输入换成网页、输出更好看，执行结果完全相同。
+
+### 启动
+
+```powershell
+python -m webui.server --open
+```
+
+浏览器打开 `http://127.0.0.1:8000/`。页面支持：
+
+- 输入任务实时运行（单任务 / 聊天两种模式），模型配置可在界面填写或沿用环境变量；
+- 右侧「创新点」面板常驻显示三项核心创新与 12 条设计点，并在对应事件发生时实时高亮；
+- 「轨迹回放」：选择历史 `session-*.jsonl` 轨迹，无需 API Key 即可回放一次完整运行。
+
+### 结构
+
+```text
+webui/
+  server.py            # 标准库 http.server + SSE，入口 python -m webui.server
+  static/
+    index.html         # 单页界面
+    style.css          # 样式
+    app.js             # EventSource 接收事件流 + 渲染 + 创新点联动
+```

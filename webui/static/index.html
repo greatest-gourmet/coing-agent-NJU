@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>自研 Coding Agent · 可视化运行台</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◈</span>
+      <div class="brand-text">
+        <h1>自研 Coding Agent · 可视化运行台</h1>
+        <p>模型通信与 Agent 编排分离 · 从零实现 · 零第三方依赖</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="btn-replay" class="ghost">🎞 轨迹回放</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div id="innovation-panel"></div>
+    </aside>
+
+    <main class="main">
+      <section class="controls card">
+        <div class="row">
+          <textarea id="task" rows="2"
+            placeholder="输入编程任务，例如：检查项目并运行测试，修复发现的问题"></textarea>
+        </div>
+        <div class="row secondary">
+          <label class="grow">工作目录
+            <input id="workdir" type="text" placeholder="demo_workspace">
+          </label>
+          <label>模式
+            <select id="mode">
+              <option value="single">单任务</option>
+              <option value="chat">聊天（连续多轮）</option>
+            </select>
+          </label>
+          <label class="check"><input id="trace" type="checkbox" checked> 记录脱敏轨迹</label>
+          <button id="btn-run" class="primary">▶ 运行</button>
+          <button id="btn-stop" class="danger" disabled>■ 停止</button>
+          <button id="btn-clear" class="ghost">清空</button>
+        </div>
+        <details class="advanced">
+          <summary>模型配置（留空则使用环境变量）</summary>
+          <div class="row">
+            <label class="grow">API Key
+              <input id="api-key" type="password" placeholder="sk-...（留空使用环境变量 OPENAI_API_KEY）">
+            </label>
+            <label class="grow">Base URL
+              <input id="base-url" type="text" placeholder="https://api.deepseek.com/v1">
+            </label>
+            <label class="grow">Model
+              <input id="model" type="text" placeholder="deepseek-chat">
+            </label>
+          </div>
+        </details>
+        <div id="status" class="status">就绪。输入任务后点击「运行」。</div>
+      </section>
+
+      <section id="timeline" class="timeline">
+        <div class="placeholder">
+          还没有运行记录。<br>输入任务并点击「运行」，或点击右上角「轨迹回放」加载历史轨迹。
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="replay-dialog">
+    <h3>轨迹回放</h3>
+    <p>选择一条历史脱敏轨迹（<code>session-*.jsonl</code>），无需 API Key 即可在界面上回放一次完整运行。</p>
+    <input id="replay-path" type="text" placeholder="demo_workspace/trace/session-xxx.jsonl">
+    <div class="replay-actions">
+      <button id="btn-replay-go" class="primary">回放</button>
+      <button id="btn-replay-close" class="ghost">取消</button>
+    </div>
+  </dialog>
+
+  <script src="/app.js"></script>
+</body>
+</html>
