@@ -381,7 +381,7 @@ def main() -> int:
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     server.daemon_threads = True
     url = f"http://127.0.0.1:{args.port}/"
-    print(f"自研 Coding Agent 可视化运行台：{url}")
+    print(f" Coding Agent 可视化运行台：{url}")
     print("按 Ctrl+C 停止服务。")
     if args.open:
         threading.Thread(

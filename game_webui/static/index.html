@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>猜数字小游戏 🎮</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="card">
+    <h1>🎯 猜数字小游戏</h1>
+    <p class="subtitle">我随机想了一个 <b id="range">1~100</b> 之间的数字，<b>你来猜</b>。</p>
+
+    <div id="result" class="result">✋ 请开始你的猜测吧</div>
+
+    <form id="form">
+      <input id="guess" type="number" min="1" max="100" placeholder="输入一个整数…" autocomplete="off" required>
+      <button type="submit">猜！</button>
+    </form>
+
+    <p class="meta">已经猜了 <b id="attempts">0</b> 次</p>
+
+    <div class="history">
+      <h2>猜过的数字</h2>
+      <div id="history" class="chips"></div>
+    </div>
+
+    <button id="newgame" class="ghost">再来一局</button>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

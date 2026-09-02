@@ -1,0 +1,133 @@
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 40px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 30px;
+  color: #1e3c72;
+}
+
+.subtitle {
+  color: #556;
+  margin: 0 0 20px;
+  font-size: 15px;
+}
+
+.subtitle b { color: #1e3c72; }
+
+.result {
+  background: #eef4ff;
+  border-left: 5px solid #2a5298;
+  border-radius: 10px;
+  padding: 16px 18px;
+  font-size: 17px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  color: #1a2a4a;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.result.won {
+  background: #eaffef;
+  border-left-color: #27ae60;
+}
+
+#form {
+  display: flex;
+  gap: 10px;
+}
+
+#guess {
+  flex: 1;
+  font-size: 18px;
+  padding: 12px 14px;
+  border: 2px solid #ccd;
+  border-radius: 10px;
+  outline: none;
+}
+
+#guess:focus { border-color: #2a5298; }
+
+button {
+  font-size: 17px;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #2a5298;
+  color: #fff;
+  font-weight: 600;
+}
+
+button:hover { background: #1e3c72; }
+
+button:disabled {
+  background: #b0b9cc;
+  cursor: not-allowed;
+}
+
+.meta {
+  color: #667;
+  margin: 16px 0 4px;
+  font-size: 14px;
+}
+
+.meta b { color: #2a5298; }
+
+.history h2 {
+  font-size: 14px;
+  color: #889;
+  margin: 16px 0 8px;
+  font-weight: 600;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 30px;
+}
+
+.chips .chip {
+  background: #f0f3fa;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 14px;
+  color: #334;
+}
+
+.chips .chip.low { background: #ffe9e9; color: #b03a3a; }
+.chips .chip.high { background: #e9f1ff; color: #2a5298; }
+
+.ghost {
+  margin-top: 20px;
+  background: transparent;
+  color: #2a5298;
+  border: 2px solid #2a5298;
+  width: 100%;
+}
+
+.ghost:hover { background: #eef4ff; }

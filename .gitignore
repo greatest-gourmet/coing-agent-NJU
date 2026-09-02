@@ -6,4 +6,5 @@ venv/
 .env
 trace/
 .agent_memory/
+snake_server.log
 

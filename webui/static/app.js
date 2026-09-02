@@ -119,7 +119,11 @@ function highlightFor(type, data) {
   }
 }
 
-/* ---------------- event rendering ---------------- */
+/* ---------------- event rendering (tabbed: one task = one panel) ---------------- */
+let turns = [];
+let activeTurnId = null;
+let turnSeq = 0;
+
 function renderEvent(type, data) {
   const tl = $("timeline");
   if (tl.querySelector(".placeholder")) tl.innerHTML = "";
@@ -127,11 +131,74 @@ function renderEvent(type, data) {
   const note = innovationNote(type, data);
   if (ids.length) flashInnovations(ids, note);
 
+  if (type === "run_started") {
+    // A new user input opens a new tab (page), labelled by the task name.
+    const turn = createTurn(data.task);
+    activateTurn(turn.id);
+    turn.panel.appendChild(makeCard(type, data, note));
+    scrollToLatest();
+    return;
+  }
+
+  const card = makeCard(type, data, note);
+  const turn = turns.find((t) => t.id === activeTurnId);
+  if (turn) turn.panel.appendChild(card);
+  else tl.appendChild(card);
+  scrollToLatest();
+}
+
+function createTurn(task) {
+  turnSeq += 1;
+  const id = "turn-" + turnSeq;
+  const title = String(task || "").trim() || ("任务 " + turnSeq);
+
+  const panel = document.createElement("div");
+  panel.className = "turn-panel";
+  panel.dataset.turnId = id;
+  $("timeline").appendChild(panel);
+
+  const tab = document.createElement("button");
+  tab.type = "button";
+  tab.className = "tab";
+  tab.dataset.turnId = id;
+  const label = document.createElement("span");
+  label.className = "tab-label";
+  label.textContent = title;
+  label.title = title;
+  tab.appendChild(label);
+  tab.addEventListener("click", () => activateTurn(id));
+  $("tabs").appendChild(tab);
+
+  const turn = { id, task, panel, tab };
+  turns.push(turn);
+  return turn;
+}
+
+function activateTurn(id) {
+  activeTurnId = id;
+  for (const t of turns) {
+    const on = t.id === id;
+    t.panel.style.display = on ? "" : "none";
+    t.tab.classList.toggle("active", on);
+  }
+}
+
+function resetTurns() {
+  turns = [];
+  activeTurnId = null;
+  turnSeq = 0;
+  $("tabs").innerHTML = "";
+}
+
+function makeCard(type, data, note) {
   const card = document.createElement("div");
   card.className = "tcard";
   card.innerHTML = renderCard(type, data, note);
-  tl.appendChild(card);
-  tl.scrollTop = tl.scrollHeight;
+  return card;
+}
+
+function scrollToLatest() {
+  window.scrollTo(0, document.documentElement.scrollHeight);
 }
 
 function innovationNote(type, data) {
@@ -157,8 +224,7 @@ function renderCard(type, data, note) {
   let html = "";
   switch (type) {
     case "run_started":
-      html = `<div class="card-head"><span class="tag tag-start">任务开始</span></div>
-        <div class="task-text">${esc(data.task)}</div>`;
+      html = `<div class="card-head"><span class="tag tag-start">任务开始</span></div>`;
       if (data.prior_lessons) html += `<div class="muted">🔍 召回 ${data.prior_lessons} 条相关历史经验</div>`;
       if (data.limits) html += `<div class="muted">资源上限：${esc(pretty(data.limits))}</div>`;
       if (data.innovations && data.innovations.length)
@@ -295,6 +361,8 @@ function finishRun(data) {
   setBusy(false);
   if (data.trace_path) setStatus((data.ok ? "✓ " : "✗ ") + data.stop_reason + " · 轨迹已保存：" + data.trace_path, data.ok ? "ok" : "err");
   else setStatus((data.ok ? "✓ " : "✗ ") + data.stop_reason, data.ok ? "ok" : "err");
+  // Bring focus back to the input so the next command can be typed immediately.
+  $("task").focus();
 }
 
 async function stopRun() {
@@ -328,6 +396,7 @@ async function doReplay() {
   if (!path) { setStatus("请填写轨迹文件路径", "err"); return; }
   closeReplayDialog();
   const tl = $("timeline");
+  resetTurns();
   tl.innerHTML = "";
   setStatus("正在回放…");
   try {
@@ -372,7 +441,7 @@ function init() {
   renderInnovations();
   $("btn-run").addEventListener("click", startRun);
   $("btn-stop").addEventListener("click", stopRun);
-  $("btn-clear").addEventListener("click", () => { $("timeline").innerHTML = `<div class="placeholder">已清空。</div>`; });
+  $("btn-clear").addEventListener("click", () => { resetTurns(); $("timeline").innerHTML = `<div class="placeholder">已清空。</div>`; });
   $("btn-replay").addEventListener("click", openReplayDialog);
   $("btn-replay-go").addEventListener("click", doReplay);
   $("btn-replay-close").addEventListener("click", closeReplayDialog);

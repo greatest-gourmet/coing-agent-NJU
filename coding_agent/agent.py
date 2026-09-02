@@ -96,15 +96,23 @@ class AgentRunner:
         if not messages:
             messages.append({"role": "system", "content": self.system_prompt})
         elif history:
-            # finish ends one task, not the interactive session. Remove its
-            # terminal tool exchange before appending the next user request.
-            if len(messages) >= 2 and messages[-1].get("role") == "tool":
+            # finish ends one task, not the interactive session. Remove the whole
+            # terminal finish exchange — the assistant tool_calls message plus every
+            # tool reply that follows it — before the next user request. A final
+            # assistant message can bundle finish with other tools, so dropping a
+            # fixed number of messages would orphan those other tool_calls.
+            if messages and messages[-1].get("role") == "tool":
                 try:
                     tool_payload = json.loads(str(messages[-1].get("content", "")))
                 except json.JSONDecodeError:
                     tool_payload = {}
                 if (tool_payload.get("metadata") or {}).get("finished") is True:
-                    messages = messages[:-2]
+                    end = len(messages)
+                    while end > 0 and messages[end - 1].get("role") == "tool":
+                        end -= 1
+                    if end > 0 and messages[end - 1].get("role") == "assistant":
+                        end -= 1
+                    messages = messages[:end]
             messages.append(
                 {
                     "role": "system",
@@ -210,15 +218,17 @@ class AgentRunner:
                 self._record_finished(result)
                 return result
 
-            for call in response.tool_calls:
+            for idx, call in enumerate(response.tool_calls):
                 calls += 1
                 if calls > self.limits.max_tool_calls:
+                    self._seal_tool_calls(messages, response.tool_calls, idx, "达到最大工具调用数，剩余工具调用未执行。")
                     return self._stopped(messages, rounds, calls, usage, "达到最大工具调用数")
 
                 call_key = (call.name, call.arguments_json)
                 repeated = repeated + 1 if call_key == previous_call else 1
                 previous_call = call_key
                 if repeated >= self.limits.max_repeated_calls:
+                    self._seal_tool_calls(messages, response.tool_calls, idx, "检测到重复工具调用，剩余工具调用未执行。")
                     return self._stopped(messages, rounds, calls, usage, "检测到重复工具调用")
 
                 arguments, parse_error = self._parse_arguments(call)
@@ -288,6 +298,7 @@ class AgentRunner:
                     self._save_lesson(task, final, observations)
                     return final
                 if parse_errors >= self.limits.max_parse_errors:
+                    self._seal_tool_calls(messages, response.tool_calls, idx + 1, "解析错误次数过多，剩余工具调用未执行。")
                     return self._stopped(messages, rounds, calls, usage, "解析错误次数过多")
 
     @staticmethod
@@ -331,6 +342,28 @@ class AgentRunner:
             "name": call.name,
             "content": json.dumps(result.to_dict(), ensure_ascii=False),
         }
+
+    def _seal_tool_calls(
+        self,
+        messages: list[Mapping[str, Any]],
+        calls: Sequence[ToolCall],
+        first_unanswered: int,
+        reason: str,
+    ) -> None:
+        """Append a synthetic tool reply for each unanswered tool call.
+
+        The Chat Completions API requires every assistant ``tool_calls`` message
+        to be followed by one ``tool`` message per ``tool_call_id``. Early-exit
+        paths (resource limits / repeated calls) would otherwise leave the
+        history in a shape the next turn's request gets rejected with HTTP 400.
+        """
+        for call in calls[first_unanswered:]:
+            messages.append(
+                self._tool_message(
+                    call,
+                    ToolResult(ok=False, error=reason, metadata={"error_type": "unanswered"}),
+                )
+            )
 
     def _stopped(
         self,

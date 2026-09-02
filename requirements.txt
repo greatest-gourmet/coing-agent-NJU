@@ -1,0 +1,20 @@
+# ===== 核心（coding_agent / webui）=====
+# 纯 Python 标准库实现，零第三方依赖，无需安装。
+
+# ===== 可选：OCR 读图（ocr_image 工具）=====
+# Windows 原生 OCR（中文精度最高，首选引擎）
+winocr
+# 通用 OCR（基于 PaddleOCR，复杂版式 / 表格效果好）
+rapidocr
+# 图像预处理（放大 / 灰度 / 二值化 / 降噪）
+Pillow
+# PDF 转图片（三者任选其一即可，均离线）
+pypdfium2
+PyMuPDF
+pypdf
+
+# 注：tess 引擎调用系统 tesseract 可执行文件，需单独安装 Tesseract-OCR，
+# 不在 pip 依赖内（见 ocr/scripts/ocr_tool.py 的 _find_tesseract）。
+
+# ===== 可选：贪吃蛇演示（snake_pygame.py）=====
+pygame

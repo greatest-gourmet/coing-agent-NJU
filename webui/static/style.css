@@ -55,7 +55,8 @@ body {
 /* ---------- cards ---------- */
 .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
 
-/* ---------- controls ---------- */
+/* ---------- sticky header (controls + tabs) ---------- */
+.sticky-head { position: sticky; top: 12px; z-index: 20; display: flex; flex-direction: column; gap: 8px; }
 .controls { padding: 14px; }
 .controls .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .controls .row + .row { margin-top: 10px; }
@@ -115,6 +116,12 @@ button.ghost { background: transparent; }
 .placeholder { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 14px; }
 .tcard { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); animation: slide .22s ease; }
 @keyframes slide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.tab { flex: 0 0 auto; max-width: 240px; padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); cursor: pointer; font: inherit; font-size: 13px; color: var(--text); box-shadow: var(--shadow); }
+.tab .tab-label { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.turn-panel { display: flex; flex-direction: column; gap: 10px; }
 
 .card-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
 .round { font-weight: 700; color: var(--muted); font-size: 12px; }
