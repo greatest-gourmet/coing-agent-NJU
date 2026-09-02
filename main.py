@@ -75,7 +75,7 @@ def make_progress_printer(api_key: str):
         if event == "run_started":
             print("[开始] 接收任务")
             print("[架构] 模型只提出动作；ToolRegistry、参数校验和本地执行由本项目自行完成")
-            print("[架构] 未调用 Codex CLI、Claude Code 或任何 Agent 框架/SDK")
+            print("[架构] 未调用任何 Agent 框架或 SDK")
             innovations = safe.get("innovations") or []
             if innovations:
                 print("[创新点] " + "；".join(map(str, innovations)))
